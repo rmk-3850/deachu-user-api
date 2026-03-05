@@ -4,17 +4,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.rm.user.dto.ErrorCode;
+import com.rm.exception.CommonResponse;
+import com.rm.exception.PasswordNotMatchException;
+import com.rm.exception.UserNotFoundException;
+import com.rm.exception.UserSuccess;
 import com.rm.user.dto.SignInResponseDto;
 import com.rm.user.dto.SignRequestEssence;
 import com.rm.user.dto.SignResponseEssence;
 import com.rm.user.dto.SignUpRequestDto;
 import com.rm.user.dto.SignUpResponseDto;
 import com.rm.user.dto.UpdateRequestDto;
-import com.rm.user.dto.UserResponse;
 import com.rm.user.entity.User;
-import com.rm.user.exception.PasswordNotMatchException;
-import com.rm.user.exception.UserNotFoundException;
 import com.rm.user.infra.JwtTokenProvider;
 import com.rm.user.repository.UserRepository;
 
@@ -38,7 +38,7 @@ public class SignService {
 	}
 	
 	public User getUserOrThrow(Long id) {
-		return userRepository.findById(id).orElseThrow(()->new UserNotFoundException());
+		return userRepository.findById(id).orElseThrow(()->new com.rm.exception.UserNotFoundException());
 	}
 	
 	public boolean passwordIsMatch(Long id,String password) {
@@ -47,9 +47,9 @@ public class SignService {
 	}
 	
 	@Transactional
-	public UserResponse<SignUpResponseDto> select(Long id){
+	public CommonResponse<SignUpResponseDto> select(Long id){
 		User user=getUserOrThrow(id);
-		return UserResponse.success(new SignUpResponseDto(
+		return CommonResponse.success(UserSuccess.SUCCESS,new SignUpResponseDto(
 				new SignResponseEssence(user.getId(), user.getUid(), user.getName()),
 				user.getPhoneNumber(),
 				user.getEmail()
@@ -57,7 +57,7 @@ public class SignService {
 	}
 	
 	@Transactional
-	public UserResponse<SignUpResponseDto> signUp(SignUpRequestDto dto) {
+	public CommonResponse<SignUpResponseDto> signUp(SignUpRequestDto dto) {
 		User savedUser=userRepository.save(
 			User.builder()
 				.uid(dto.e().uid())
@@ -68,29 +68,29 @@ public class SignService {
 				.roles(dto.roles())
 				.build()
 		);		
-		return UserResponse.success(SignUpResponseDto.from(savedUser));
+		return CommonResponse.success(UserSuccess.SUCCESS,SignUpResponseDto.from(savedUser));
 	}
 	
 	@Transactional
-	public UserResponse<SignInResponseDto> signIn(SignRequestEssence dto){
+	public CommonResponse<SignInResponseDto> signIn(SignRequestEssence dto){
 		User user=userRepository.getByUid(dto.uid());
 		if(user==null) throw new UserNotFoundException();
 		if(!passwordEncoder.matches(dto.password(), user.getPassword())) throw new PasswordNotMatchException();
-		return UserResponse.success(new SignInResponseDto(
+		return CommonResponse.success(UserSuccess.SUCCESS,new SignInResponseDto(
 				new SignResponseEssence(user.getId(), user.getUid(), user.getName()),
 				tokenProvider.createToken(user.getUid(), user.getRoles())
 		));
 	}
 	
 	@Transactional
-	public UserResponse<SignUpResponseDto> update(Long id,UpdateRequestDto dto){
+	public CommonResponse<SignUpResponseDto> update(Long id,UpdateRequestDto dto){
 		User user=getUserOrThrow(id);
 		user.update(
 			dto.name(),
 			passwordEncoder.encode(dto.e().password()),
 			dto.phoneNumber()
 		);
-		return UserResponse.success(new SignUpResponseDto(
+		return CommonResponse.success(UserSuccess.SUCCESS,new SignUpResponseDto(
 				new SignResponseEssence(user.getId(), user.getUid(), user.getName()),
 				user.getPhoneNumber(),
 				user.getEmail()
@@ -98,9 +98,9 @@ public class SignService {
 	}
 	
 	@Transactional
-	public UserResponse<Void> delete(Long id){
+	public CommonResponse<Void> delete(Long id){
 		User user=getUserOrThrow(id);
 		userRepository.delete(user);
-		return new UserResponse<>(true, ErrorCode.SUCCESS.getStatus(), ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMsg(), null);
+		return new CommonResponse<>(true, UserSuccess.SUCCESS.getStatus(), UserSuccess.SUCCESS.getCode(), UserSuccess.SUCCESS.getMsg(), null);
 	}
 }

@@ -49,7 +49,6 @@ public class User implements UserDetails{
 	private String name;
 	
 	@JsonProperty(access = Access.WRITE_ONLY)
-	@Column(nullable = false)
 	private String password;
 	
 	@Column(nullable = false,length = 20)

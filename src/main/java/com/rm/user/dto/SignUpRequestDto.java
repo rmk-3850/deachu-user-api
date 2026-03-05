@@ -16,7 +16,7 @@ public record SignUpRequestDto(
 		@NotBlank String name,
 		@Telephone String phoneNumber,
 		@Email@NotNull String email,
-		@NotNull List<String> roles
+		List<String> roles
 	) {
 
 }

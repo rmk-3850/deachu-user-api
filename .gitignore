@@ -8,6 +8,7 @@ src/main/resources/application-*.yml
 !src/main/resources/application.yml
 docker/mariadb/user/init/init.sql
 .env
+gradle.properties
 ### STS ###
 .apt_generated
 .classpath
