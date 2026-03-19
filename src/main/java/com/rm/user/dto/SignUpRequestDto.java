@@ -14,7 +14,7 @@ public record SignUpRequestDto(
 		@Valid SignRequestEssence e,
 		@Schema(description = "공백불가")
 		@NotBlank String name,
-		@Telephone String phoneNumber,
+		@Telephone@NotNull String phoneNumber,
 		@Email@NotNull String email,
 		List<String> roles
 	) {

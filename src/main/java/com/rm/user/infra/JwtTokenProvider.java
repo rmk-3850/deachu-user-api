@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
-@Log4j2
+@Slf4j
 public class JwtTokenProvider {
 	private final Key key;	
 	private final Clock clock;	
@@ -24,25 +24,25 @@ public class JwtTokenProvider {
 	public JwtTokenProvider(
 			Clock clock,
 			@Value("${jwt.secret}") String base64Key,
-			@Value("${jwt.token-valid-ms}") long tokenValidMillisecond) {
+			@Value("${jwt.token-valid-ms}") String tokenValidMillisecond) {
 		byte[] keyBytes=Base64.getDecoder().decode(base64Key);
 		this.key=Keys.hmacShaKeyFor(keyBytes);
 		this.clock=clock;
-		this.tokenValidMillisecond=tokenValidMillisecond;
+		this.tokenValidMillisecond=Long.parseLong(tokenValidMillisecond);
 	}
 	
-	public String createToken(String uid,List<String> roles) {
+	public String createToken(Long id,List<String> roles) {
 		log.info("[createToken] 토큰 생성 시작");
 		Instant now=Instant.now(clock);
 		Date issuedAt=Date.from(now);
 		Date expiration=Date.from(now.plusMillis(tokenValidMillisecond));
 		String token=Jwts.builder()
-				.setSubject(uid)
+				.setSubject(String.valueOf(id))
 				.claim("roles", roles)
 				.setIssuedAt(issuedAt)
 				.setExpiration(expiration)
 				.signWith(key)
-				.compact();		
+				.compact();
 		log.info("[createToken] 토큰 생성 완료");
 		return token;
 	}

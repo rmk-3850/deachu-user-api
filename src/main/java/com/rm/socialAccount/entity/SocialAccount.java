@@ -1,9 +1,9 @@
 package com.rm.socialAccount.entity;
 
-import java.security.AuthProvider;
-
+import com.rm.socialAccount.AuthProvider;
 import com.rm.user.entity.User;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -22,16 +22,40 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(
     name = "social_account",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"user_id","provider"})
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_user_provider",
+            columnNames = {"user_id","provider"}
+        ),
+        @UniqueConstraint(
+            name = "uk_provider_provider_user_id",
+            columnNames = {"provider","provider_user_id"}
+        )
+    }
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SocialAccount {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Enumerated(EnumType.STRING)
     private AuthProvider provider;
+
+    @Column(name = "provider_user_id",nullable = false)
+    private String providerUserId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+    
+    public SocialAccount(
+        AuthProvider provider,
+        String providerUserId,
+        User user
+        ) {
+        this.provider=provider;
+        this.providerUserId=providerUserId;
+        this.user=user;
+    }
 }

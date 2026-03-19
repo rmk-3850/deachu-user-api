@@ -1,17 +1,12 @@
 package com.rm.user.entity;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -19,6 +14,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
@@ -30,67 +26,43 @@ import lombok.Setter;
 @Entity
 @Table(
 	name = "user",
-	uniqueConstraints = {@UniqueConstraint(columnNames = "email")}
+	uniqueConstraints = @UniqueConstraint(
+		name = "uk_user_email",
+		columnNames = "email"
+	)
 )
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User implements UserDetails{
+public class User {
 	
-	@Id @GeneratedValue(strategy = GenerationType.AUTO)
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
 	@Column(nullable = false, unique = true)
 	private String uid;
 	
-	@Column(nullable = false)
 	private String name;
 	
 	@JsonProperty(access = Access.WRITE_ONLY)
 	private String password;
 	
-	@Column(nullable = false,length = 20)
+	@Column(length = 20)
 	private String phoneNumber;
 	
-	@Column(nullable = false,length = 255)
+	@Column(length = 255)
 	private String email;
 	
 	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(
+		name = "user_roles",
+		joinColumns = @JoinColumn(name="user_id")
+	)
+	@Column(name = "role")
 	@Builder.Default
 	private List<String> roles=new ArrayList<String>();
-	
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-	}
-	
-	@JsonProperty(access = Access.WRITE_ONLY)
-	@Override
-	public String getUsername() {
-		return uid;
-	}
-	@JsonProperty(access = Access.WRITE_ONLY)
-	@Override
-	public boolean isAccountNonExpired() {
-		return UserDetails.super.isAccountNonExpired();
-	}
-	@JsonProperty(access = Access.WRITE_ONLY)
-	@Override
-	public boolean isAccountNonLocked() {
-		return UserDetails.super.isAccountNonLocked();
-	}
-	@JsonProperty(access = Access.WRITE_ONLY)
-	@Override
-	public boolean isCredentialsNonExpired() {
-		return UserDetails.super.isCredentialsNonExpired();
-	}
-	@JsonProperty(access = Access.WRITE_ONLY)
-	@Override
-	public boolean isEnabled() {
-		return UserDetails.super.isEnabled();
-	}
 	
 	public void update(String name,String password,String phoneNumber) {
 		this.name=name;

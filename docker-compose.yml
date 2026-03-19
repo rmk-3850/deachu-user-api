@@ -9,7 +9,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
-      - ./docker/mariadb/user/init:/docker-entrypoint-initdb.d
+    - ./docker/mariadb/user/init/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
     - msa-network
 
