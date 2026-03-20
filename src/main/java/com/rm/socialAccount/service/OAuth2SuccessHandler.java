@@ -37,7 +37,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler{
             .path("/")
             .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        String redirectUrl = "https://dx4a7vlkmjql7.cloudfront.net";
+        String redirectUrl = "https://deachu.site";
         response.sendRedirect(redirectUrl);
     }
 }
