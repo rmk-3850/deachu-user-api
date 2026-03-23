@@ -46,7 +46,7 @@ public class UserPublicController {
 	@Operation(description = "email 중복 조회")
 	@GetMapping("/email")
 	public ResponseEntity<Boolean> isDuplicationEmail(
-			@Parameter(description = "아이디",required = true)
+			@Parameter(description = "이메일",required = true)
 			@Email @RequestParam String email
 		){
 		return ResponseEntity.ok(signService.existsByEmail(email));

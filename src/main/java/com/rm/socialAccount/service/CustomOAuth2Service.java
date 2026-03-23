@@ -34,7 +34,7 @@ public class CustomOAuth2Service
         String providerUserId = provider+"_"+oAuthUser.getAttribute("sub");
         String email = oAuthUser.getAttribute("email");
         AuthProvider authProvider=AuthProvider.from(provider);
-        SocialAccount account = socialAccountRepository.findByProviderAndProviderUserId(authProvider, providerUserId)
+        SocialAccount account = socialAccountRepository.findByProviderAndProviderUserIdWithUser(authProvider, providerUserId)
             .orElseGet(() -> {
                 User newUser = userRepository.findByEmail(email).orElseGet(() -> 
                     userRepository.save(
